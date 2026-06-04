@@ -9,7 +9,6 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       '@shopify/react-native-skia': './src/utils/web-fallbacks/skia.web',
       'expo-haptics': './src/utils/web-fallbacks/haptics.web',
       'expo-blur': './src/utils/web-fallbacks/blur.web',
-      'react-native-purchases': './src/utils/web-fallbacks/purchases.web',
       'expo-location': './src/utils/web-fallbacks/location.web',
       'react-native-maps': './src/utils/web-fallbacks/maps.web',
     };

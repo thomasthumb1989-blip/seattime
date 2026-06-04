@@ -86,7 +86,6 @@ shadowLayer3: { shadowOffset: { width: 0, height: 16 }, shadowRadius: 32, shadow
 - Drive History: ORGANISED. Clean list, filterable, route previews.
 - Progress: MOTIVATIONAL. Big numbers, colour-coded, celebrate milestones.
 - Settings: CLEAN. Trustworthy. Zero clutter.
-- Paywall: CONFIDENT. This tool protects your logged hours. Worth every penny.
 - Onboarding: SIMPLE + FAST. State selection → first drive in under 60 seconds.
 
 ## Anti-patterns (NEVER)

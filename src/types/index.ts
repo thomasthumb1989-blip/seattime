@@ -29,5 +29,4 @@ export interface UserProfile {
   stateCode: string;
   dateOfBirth: string;
   permitStartDate: string;
-  isPremium: boolean;
 }

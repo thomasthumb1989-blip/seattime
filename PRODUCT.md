@@ -7,11 +7,10 @@ SeatTime is a supervised driving hours tracker for teen learner permit holders i
 Parents of 15-17-year-old teens with a learner's permit in any of the 47 US states (+ DC) that require logged supervised driving hours before a license can be issued. The parent is the buyer and primary user. The teen is the beneficiary and secondary user.
 
 ## How it makes money
-- Soft paywall. First 5 drives free (enough to prove value and build trust).
-- One-time unlock: $9.99 (unlimited drives + PDF export + all 50 states).
-- RevenueCat handles the non-consumable IAP / lifetime entitlement.
-- No subscription — compliance tool with 6-12 month lifecycle.
-- No ads. Ever.
+- Paid app: $9.99 upfront on the App Store. No IAP, no subscription, no ads.
+- Apple handles all payment at download. No RevenueCat needed.
+- Every user who opens the app has already paid — no conversion funnel to manage.
+- Screenshots and App Store metadata do all the selling.
 
 ## Core feature loop
 1. Parent/teen opens app
@@ -64,7 +63,6 @@ Parents of 15-17-year-old teens with a learner's permit in any of the 47 US stat
 - All competitors: no celebration of progress — we have Milestone Burst
 
 ## Success metrics
-- Free to paid conversion: target 40%+
 - Day-30 retention: target 60%+
 - Revenue at 6 months: target $3K+
 - App Store rating: target 4.5+ within first 100 reviews

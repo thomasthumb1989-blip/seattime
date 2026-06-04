@@ -16,7 +16,7 @@
 - React Native + Expo SDK 56 + TypeScript
 - expo-router for navigation
 - EAS Build for both iOS and Android cloud builds
-- RevenueCat for IAP (non-consumable $9.99 one-time purchase)
+- Paid upfront app ($9.99). No IAP, no RevenueCat, no paywall. Apple handles payment.
 - Firebase JS SDK for auth + Firestore (multi-parent sharing)
 - expo-location for GPS route tracking
 - expo-print + expo-sharing for PDF export
