@@ -15,12 +15,15 @@ export interface DrivingSession {
 }
 
 export interface StateRequirement {
-  stateCode: string;
-  stateName: string;
+  state: string;
+  abbreviation: string;
   totalHours: number;
+  dayHours: number;
   nightHours: number;
-  minimumAge: number;
-  permitDurationMonths: number;
+  permitAge: number;
+  permitMonths: number;
+  hasRequirement: boolean;
+  notes: string;
 }
 
 export interface UserProfile {
