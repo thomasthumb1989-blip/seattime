@@ -63,6 +63,12 @@
 - Submit iOS: eas submit --platform ios
 - Submit Android: eas submit --platform android
 
+## Project Status
+- Phase 1 (Setup): COMPLETE — 13 commits on main
+- Phase 2 (Design System): COMPLETE — all UI components built, all screens designed and approved
+- Phase 3 (Features): NEXT — starting with Onboarding
+- Feature build order: Onboarding → Drive Timer → Drive Complete → Home Dashboard → History → Progress → Settings → Multi-Parent Sync → PDF Export → Error Boundary
+
 ## File Naming
 - Components: PascalCase.tsx
 - Hooks: useCamelCase.ts
@@ -71,4 +77,9 @@
 - Types: PascalCase exports from camelCase file
 
 ## Gotchas Found (append as we hit them)
-- [Date] [bug] → [fix]
+- [2026-06-04] Stop hook fatal error → was hardcoded to tradingbots repo path, removed from ~/.claude/settings.json. SessionStart hook kept.
+- [2026-06-04] PowerShell cwd resets to C:\Windows\System32 after shell commands → always cd into project dir first when starting Claude Code (cd C:\Users\Thoma\seattime && claude)
+- [2026-06-04] Applyra MCP only available in Claude Code terminal, not Claude chat → keyword research prompts go here
+- [2026-06-04] Ahrefs keywords explorer returns plan restriction error on Dan's subscription → don't attempt to use it
+- [2026-06-04] Firebase is JS SDK (web config), not @react-native-firebase → register as web app in Firebase Console, not iOS
+- [2026-06-04] App is paid upfront $9.99, no IAP, no RevenueCat, no paywall → Apple handles payment at download
