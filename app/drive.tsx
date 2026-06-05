@@ -126,6 +126,7 @@ export default function DriveScreen() {
   }, [timer, teenName, stateCode, timeOfDay, weather, roadType, addSession]);
 
   const cancelEndDrive = useCallback(() => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setShowConfirm(false);
   }, []);
 

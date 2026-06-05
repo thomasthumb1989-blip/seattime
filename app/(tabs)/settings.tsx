@@ -127,6 +127,7 @@ export default function SettingsScreen() {
   );
 
   const handleNameEdit = useCallback(() => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setNameInput(teenName);
     setEditingName(true);
   }, [teenName]);

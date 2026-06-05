@@ -76,8 +76,8 @@ export default function HistoryScreen() {
     setRefreshing(false);
   }, [reload]);
 
-  const handleCardPress = useCallback((session: DriveSession) => {
-    console.log('Drive detail:', session.id);
+  const handleCardPress = useCallback((_session: DriveSession) => {
+    // Drive detail view — future feature
   }, []);
 
   return (
