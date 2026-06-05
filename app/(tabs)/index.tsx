@@ -17,14 +17,15 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Play, Plus, Moon, Sun, Cloud, Snowflake, Eye, MapPin } from 'lucide-react-native';
+import { Play, Plus } from 'lucide-react-native';
 
 import { Heading } from '@src/components/ui/Heading';
 import { BodyText } from '@src/components/ui/BodyText';
 import { GlassCard } from '@src/components/ui/GlassCard';
 import { ProgressRing } from '@src/components/ui/ProgressRing';
+import { DriveCard } from '@src/components/drive/DriveCard';
 import { ManualLogForm } from '@src/components/drive/ManualLogForm';
-import { Colors, type AppColors } from '@src/constants/colors';
+import { Colors } from '@src/constants/colors';
 import { Strings } from '@src/constants/strings';
 import { useDriveSessions } from '@src/hooks/useDriveSessions';
 import { useProgress } from '@src/hooks/useProgress';
@@ -32,10 +33,6 @@ import { getOnboardingData } from '@src/hooks/useOnboarding';
 import type { DriveSession } from '@src/types';
 
 const SH = Strings.HOME;
-
-function capitalizeFirst(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -197,7 +194,7 @@ export default function HomeScreen() {
               <Pressable
                 onPress={() => {
                   if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  // History tab navigation — wired up when History screen exists
+                  router.navigate('/(tabs)/history' as any);
                 }}
                 hitSlop={12}
               >
@@ -206,8 +203,8 @@ export default function HomeScreen() {
                 </BodyText>
               </Pressable>
             </View>
-            {sessions.slice(0, 3).map((session, index) => (
-              <DriveCard key={session.id} session={session} colors={colors} index={index} />
+            {sessions.slice(0, 3).map((s, i) => (
+              <DriveCard key={s.id} session={s} colors={colors} index={i} />
             ))}
           </Animated.View>
         )}
@@ -305,92 +302,6 @@ function ActionButton({
   );
 }
 
-function getWeatherIcon(weather: string, color: string) {
-  switch (weather) {
-    case 'rain': return <Cloud size={12} color={color} />;
-    case 'snow': return <Snowflake size={12} color={color} />;
-    case 'fog': return <Eye size={12} color={color} />;
-    default: return <Sun size={12} color={color} />;
-  }
-}
-
-function DriveCard({
-  session,
-  colors,
-  index,
-}: {
-  session: DriveSession;
-  colors: AppColors;
-  index: number;
-}) {
-  const minutes = Math.round(session.durationSeconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  const durationText = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  const date = new Date(session.startTime);
-  const dateText = date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
-  const isNight = session.conditions.timeOfDay === 'night';
-
-  return (
-    <Animated.View entering={FadeIn.delay(index * 100).duration(200)}>
-      <View
-        style={[
-          styles.driveCard,
-          { backgroundColor: colors.bgSecondary, borderColor: colors.border },
-        ]}
-      >
-        <View style={styles.driveCardTop}>
-          <View style={[styles.driveIcon, { backgroundColor: isNight ? colors.accent + '20' : colors.primary + '20' }]}>
-            {isNight ? (
-              <Moon size={16} color={colors.accent} />
-            ) : (
-              <Sun size={16} color={colors.primary} />
-            )}
-          </View>
-          <View style={styles.driveInfo}>
-            <BodyText style={{ fontWeight: '600', fontSize: 16 }}>{durationText}</BodyText>
-            <BodyText variant="caption" secondary>{dateText}</BodyText>
-          </View>
-          {session.distanceMiles > 0 && (
-            <BodyText variant="caption" secondary>
-              {session.distanceMiles.toFixed(1)} mi
-            </BodyText>
-          )}
-        </View>
-        <View style={styles.badgeRow}>
-          <View style={[styles.badge, { backgroundColor: isNight ? colors.accent + '15' : colors.primary + '15' }]}>
-            {isNight ? <Moon size={12} color={colors.accent} /> : <Sun size={12} color={colors.primary} />}
-            <BodyText variant="caption" style={{ fontWeight: '500', fontSize: 12 }}>
-              {isNight ? 'Night' : 'Day'}
-            </BodyText>
-          </View>
-          <View style={[styles.badge, { backgroundColor: colors.textSecondary + '12' }]}>
-            {getWeatherIcon(session.conditions.weather, colors.textSecondary)}
-            <BodyText variant="caption" secondary style={{ fontSize: 12 }}>
-              {capitalizeFirst(session.conditions.weather)}
-            </BodyText>
-          </View>
-          <View style={[styles.badge, { backgroundColor: colors.textSecondary + '12' }]}>
-            <MapPin size={12} color={colors.textSecondary} />
-            <BodyText variant="caption" secondary style={{ fontSize: 12 }}>
-              {capitalizeFirst(session.conditions.roadType)}
-            </BodyText>
-          </View>
-          {session.isManual && (
-            <View style={[styles.badge, { backgroundColor: colors.textSecondary + '12' }]}>
-              <BodyText variant="caption" secondary style={{ fontSize: 12 }}>Manual</BodyText>
-            </View>
-          )}
-        </View>
-      </View>
-    </Animated.View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -443,42 +354,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
-  },
-  driveCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    marginBottom: 10,
-  },
-  driveCardTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 10,
-  },
-  driveIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  driveInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
   },
   emptyState: {
     alignItems: 'center',

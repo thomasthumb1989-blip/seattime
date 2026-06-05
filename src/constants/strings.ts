@@ -76,6 +76,32 @@ export const Strings = {
     DONE: 'Done',
   },
 
+  HISTORY: {
+    TITLE: 'Drive History',
+    DRIVE_COUNT: (count: number) => `${count} drive${count === 1 ? '' : 's'} logged`,
+    FILTER_ALL: 'All',
+    FILTER_DAY: 'Day',
+    FILTER_NIGHT: 'Night',
+    FILTER_HIGHWAY: 'Highway',
+    FILTER_RESIDENTIAL: 'Residential',
+    FILTER_RURAL: 'Rural',
+    FILTER_PARKING: 'Parking Lot',
+    FILTER_MANUAL: 'Manual',
+    SUMMARY: (totalHours: number, nightHours: number) =>
+      `Total: ${totalHours} hours · ${nightHours} night hours`,
+    EMPTY_ALL: 'No drives logged yet',
+    EMPTY_DAY: 'No day drives yet',
+    EMPTY_NIGHT: 'No night drives yet',
+    EMPTY_HIGHWAY: 'No highway drives logged',
+    EMPTY_RESIDENTIAL: 'No residential drives logged',
+    EMPTY_RURAL: 'No rural drives logged',
+    EMPTY_PARKING: 'No parking lot drives logged',
+    EMPTY_MANUAL: 'No manual entries yet',
+    EMPTY_SUBTITLE: 'Drives matching this filter will appear here.',
+    TIME_RANGE: (start: string, end: string) => `${start} — ${end}`,
+    MANUAL_ENTRY: 'Manual entry',
+  },
+
   HOME: {
     GREETING: (name: string) => `Welcome back`,
     GREETING_FIRST: (name: string) => `Let's get started, ${name}!`,

@@ -12,38 +12,38 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
-        headerShown: true,
+        headerShown: false,
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
+          title: 'Home',
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
+                ios: 'house.fill',
+                android: 'home',
+                web: 'home',
               }}
               tintColor={color}
-              size={28}
+              size={24}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="history"
         options={{
-          title: 'Tab Two',
+          title: 'History',
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
+                ios: 'clock.fill',
+                android: 'schedule',
+                web: 'schedule',
               }}
               tintColor={color}
-              size={28}
+              size={24}
             />
           ),
         }}
