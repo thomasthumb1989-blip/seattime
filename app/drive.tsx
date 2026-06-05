@@ -36,6 +36,7 @@ import {
   useDriveSessions,
   generateSessionId,
 } from '@src/hooks/useDriveSessions';
+import { useSync } from '@src/hooks/useFirestoreSync';
 import { getOnboardingData } from '@src/hooks/useOnboarding';
 import type { TimeOfDay, Weather, RoadType, DriveSession } from '@src/types';
 
@@ -47,6 +48,7 @@ export default function DriveScreen() {
   const insets = useSafeAreaInsets();
   const timer = useDriveTimer();
   const { addSession } = useDriveSessions();
+  const { pushSession } = useSync();
 
   const [teenName, setTeenName] = useState('');
   const [stateCode, setStateCode] = useState('');
@@ -119,6 +121,7 @@ export default function DriveScreen() {
     };
 
     await addSession(session);
+    pushSession(session).catch(() => {});
     router.replace({ pathname: '/drive-complete', params: { sessionId: session.id } } as any);
   }, [timer, teenName, stateCode, timeOfDay, weather, roadType, addSession]);
 

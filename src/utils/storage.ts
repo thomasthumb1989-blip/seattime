@@ -4,6 +4,8 @@ const KEYS = {
   sessions: 'seattime_sessions',
   profile: 'seattime_profile',
   onboarded: 'seattime_onboarded',
+  auth_skipped: 'seattime_auth_skipped',
+  family_id: 'seattime_family_id',
 } as const;
 
 export async function getItem<T>(key: string): Promise<T | null> {

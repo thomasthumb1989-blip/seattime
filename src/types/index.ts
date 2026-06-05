@@ -68,4 +68,29 @@ export interface DriveSession {
   conditions: DriveConditions;
   isManual: boolean;
   createdAt: number;
+  createdBy?: string;
+  syncedAt?: number;
+}
+
+export interface FamilyData {
+  id: string;
+  members: string[];
+  memberEmails: Record<string, string>;
+  teenName: string;
+  state: string;
+  createdBy: string;
+  createdAt: number;
+}
+
+export interface FamilyMember {
+  uid: string;
+  email: string;
+}
+
+export interface InviteData {
+  code: string;
+  familyId: string;
+  createdBy: string;
+  createdAt: number;
+  expiresAt: number;
 }

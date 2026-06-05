@@ -30,22 +30,32 @@ import {
   Mail,
   Trash2,
   RotateCcw,
+  LogIn,
+  LogOut,
+  Cloud,
+  CloudOff,
+  Loader,
 } from 'lucide-react-native';
 
 import { Heading } from '@src/components/ui/Heading';
 import { BodyText } from '@src/components/ui/BodyText';
 import { SettingsRow } from '@src/components/settings/SettingsRow';
 import { StatePickerModal } from '@src/components/settings/StatePickerModal';
+import { InviteModal } from '@src/components/settings/InviteModal';
+import { JoinFamilyModal } from '@src/components/settings/JoinFamilyModal';
 import { Colors } from '@src/constants/colors';
 import { Strings } from '@src/constants/strings';
 import { KEYS, setItem, removeItem } from '@src/utils/storage';
 import { exportSessionsAsJson } from '@src/utils/exportData';
 import { useDriveSessions } from '@src/hooks/useDriveSessions';
+import { useAuth } from '@src/contexts/AuthContext';
+import { useSync } from '@src/hooks/useFirestoreSync';
 import { getOnboardingData } from '@src/hooks/useOnboarding';
 import { getStateByAbbreviation } from '@src/data/stateRequirements';
 import type { OnboardingData } from '@src/types';
 
 const SS = Strings.SETTINGS;
+const SF = Strings.FAMILY;
 
 type AppearanceMode = 'light' | 'dark' | 'system';
 
@@ -55,12 +65,16 @@ export default function SettingsScreen() {
   const colors = Colors[theme];
   const insets = useSafeAreaInsets();
   const { sessions, reload } = useDriveSessions();
+  const { user, isSkipped, signOut } = useAuth();
+  const { familyId, syncState, familyMembers, familyCreator, removeMember, loadFamily } = useSync();
 
   const [teenName, setTeenName] = useState('');
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [stateCode, setStateCode] = useState('');
   const [showStatePicker, setShowStatePicker] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const [appearance, setAppearance] = useState<AppearanceMode>('system');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -84,8 +98,9 @@ export default function SettingsScreen() {
       setStateCode(data.state);
     }
     await reload();
+    await loadFamily();
     setRefreshing(false);
-  }, [reload]);
+  }, [reload, loadFamily]);
 
   const stateData = stateCode ? getStateByAbbreviation(stateCode) : undefined;
   const stateName = stateData?.state ?? stateCode;
@@ -132,11 +147,6 @@ export default function SettingsScreen() {
     [saveOnboardingField]
   );
 
-  const showComingSoon = useCallback(() => {
-    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert(SS.COMING_SOON, SS.COMING_SOON_MSG);
-  }, []);
-
   const handleExportJson = useCallback(async () => {
     if (sessions.length === 0) {
       Alert.alert(SS.EXPORT_JSON, SS.EXPORT_EMPTY);
@@ -157,9 +167,37 @@ export default function SettingsScreen() {
 
   const handleRate = useCallback(() => {
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Replace with real App Store URL
     Alert.alert(SS.COMING_SOON, 'App Store listing will be available after launch.');
   }, []);
+
+  const handleSignOut = useCallback(async () => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await signOut();
+  }, [signOut]);
+
+  const handleGoToAuth = useCallback(() => {
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/auth' as any);
+  }, []);
+
+  const handleRemoveMember = useCallback((uid: string, email: string) => {
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    Alert.alert(
+      SF.MEMBER_REMOVE_CONFIRM_TITLE,
+      SF.MEMBER_REMOVE_CONFIRM_MSG,
+      [
+        { text: SS.DELETE_CONFIRM_NO, style: 'cancel' },
+        {
+          text: SF.MEMBER_REMOVE,
+          style: 'destructive',
+          onPress: async () => {
+            await removeMember(uid);
+            if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          },
+        },
+      ]
+    );
+  }, [removeMember]);
 
   const handleDeleteData = useCallback(() => {
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -201,9 +239,12 @@ export default function SettingsScreen() {
                   text: SS.RESET_CONFIRM_YES,
                   style: 'destructive',
                   onPress: async () => {
+                    await signOut().catch(() => {});
                     await removeItem(KEYS.sessions);
                     await removeItem(KEYS.onboarded);
                     await removeItem(KEYS.profile);
+                    await removeItem(KEYS.auth_skipped);
+                    await removeItem(KEYS.family_id);
                     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     router.replace('/onboarding' as any);
                   },
@@ -214,13 +255,29 @@ export default function SettingsScreen() {
         },
       ]
     );
-  }, []);
+  }, [signOut]);
 
   const appearanceIcon = appearance === 'dark'
     ? <Moon size={18} color={colors.textSecondary} />
     : appearance === 'light'
       ? <Sun size={18} color={colors.textSecondary} />
       : <Smartphone size={18} color={colors.textSecondary} />;
+
+  const syncIcon = syncState === 'synced'
+    ? <Cloud size={18} color={colors.success} />
+    : syncState === 'syncing'
+      ? <Loader size={18} color={colors.primary} />
+      : syncState === 'offline'
+        ? <CloudOff size={18} color={colors.textSecondary} />
+        : null;
+
+  const syncLabel = syncState === 'synced' ? SF.SYNCED
+    : syncState === 'syncing' ? SF.SYNCING
+    : syncState === 'offline' ? SF.OFFLINE
+    : '';
+
+  const isCreator = user && familyCreator === user.uid;
+  const otherMembers = familyMembers.filter((m) => m.uid !== user?.uid);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -278,21 +335,72 @@ export default function SettingsScreen() {
         <Animated.View entering={FadeIn.delay(160).duration(300)}>
           <Heading variant="h3" style={styles.sectionTitle}>{SS.FAMILY}</Heading>
           <View style={[styles.section, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            {/* TODO: Wire in feature #8 — Multi-Parent Sync */}
-            <SettingsRow
-              label={SS.INVITE_COPARENT}
-              icon={<UserPlus size={18} color={colors.textSecondary} />}
-              onPress={showComingSoon}
-              colors={colors}
-            />
-            {/* TODO: Wire in feature #8 — Multi-Parent Sync */}
-            <SettingsRow
-              label={SS.MANAGE_FAMILY}
-              icon={<Users size={18} color={colors.textSecondary} />}
-              onPress={showComingSoon}
-              colors={colors}
-              isLast
-            />
+            {user ? (
+              <>
+                {/* Account row */}
+                <SettingsRow
+                  label={SF.SIGNED_IN_AS}
+                  value={user.email ?? ''}
+                  icon={<User size={18} color={colors.primary} />}
+                  showChevron={false}
+                  colors={colors}
+                />
+                {/* Sync status */}
+                {syncIcon && (
+                  <SettingsRow
+                    label={syncLabel}
+                    icon={syncIcon}
+                    showChevron={false}
+                    colors={colors}
+                  />
+                )}
+                {/* Invite */}
+                <SettingsRow
+                  label={SS.INVITE_COPARENT}
+                  icon={<UserPlus size={18} color={colors.textSecondary} />}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowInvite(true);
+                  }}
+                  colors={colors}
+                />
+                {/* Join */}
+                <SettingsRow
+                  label={SF.JOIN_TITLE}
+                  icon={<Users size={18} color={colors.textSecondary} />}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowJoin(true);
+                  }}
+                  colors={colors}
+                  isLast={otherMembers.length === 0}
+                />
+                {/* Family members */}
+                {otherMembers.map((member, i) => (
+                  <SettingsRow
+                    key={member.uid}
+                    label={member.email}
+                    value={member.uid === familyCreator ? SF.MEMBER_CREATOR : ''}
+                    icon={<User size={18} color={colors.textSecondary} />}
+                    onPress={isCreator ? () => handleRemoveMember(member.uid, member.email) : undefined}
+                    showChevron={!!isCreator}
+                    colors={colors}
+                    isLast={i === otherMembers.length - 1}
+                  />
+                ))}
+              </>
+            ) : (
+              <>
+                {/* Not signed in */}
+                <SettingsRow
+                  label={SF.SIGN_IN_REQUIRED}
+                  icon={<LogIn size={18} color={colors.primary} />}
+                  onPress={handleGoToAuth}
+                  colors={colors}
+                  isLast
+                />
+              </>
+            )}
           </View>
         </Animated.View>
 
@@ -304,7 +412,10 @@ export default function SettingsScreen() {
             <SettingsRow
               label={SS.EXPORT_PDF}
               icon={<FileText size={18} color={colors.textSecondary} />}
-              onPress={showComingSoon}
+              onPress={() => {
+                if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                Alert.alert(SS.COMING_SOON, SS.COMING_SOON_MSG);
+              }}
               colors={colors}
             />
             <SettingsRow
@@ -380,8 +491,17 @@ export default function SettingsScreen() {
               icon={<Mail size={18} color={colors.textSecondary} />}
               onPress={handleSupport}
               colors={colors}
-              isLast
+              isLast={!user}
             />
+            {user && (
+              <SettingsRow
+                label={SF.SIGN_OUT}
+                icon={<LogOut size={18} color={colors.textSecondary} />}
+                onPress={handleSignOut}
+                colors={colors}
+                isLast
+              />
+            )}
           </View>
         </Animated.View>
 
@@ -415,6 +535,14 @@ export default function SettingsScreen() {
         currentState={stateCode}
         onSelect={handleStateChange}
         onClose={() => setShowStatePicker(false)}
+      />
+      <InviteModal
+        visible={showInvite}
+        onClose={() => setShowInvite(false)}
+      />
+      <JoinFamilyModal
+        visible={showJoin}
+        onClose={() => setShowJoin(false)}
       />
     </View>
   );

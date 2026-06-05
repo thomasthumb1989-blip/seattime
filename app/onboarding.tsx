@@ -408,7 +408,7 @@ export default function OnboardingScreen() {
 
   const handleComplete = useCallback(async () => {
     await complete();
-    router.replace('/(tabs)' as any);
+    router.replace('/auth' as any);
   }, [complete]);
 
   return (
