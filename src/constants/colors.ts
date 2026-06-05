@@ -45,3 +45,4 @@ export const Colors = {
 
 export type ColorScheme = keyof typeof Colors;
 export type ColorKey = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type AppColors = (typeof Colors)[ColorScheme];
