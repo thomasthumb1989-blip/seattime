@@ -83,3 +83,4 @@
 - [2026-06-04] Ahrefs keywords explorer returns plan restriction error on Dan's subscription → don't attempt to use it
 - [2026-06-04] Firebase is JS SDK (web config), not @react-native-firebase → register as web app in Firebase Console, not iOS
 - [2026-06-04] App is paid upfront $9.99, no IAP, no RevenueCat, no paywall → Apple handles payment at download
+- [2026-06-05] ThemeProvider from @react-navigation/native blocked by SDK 56 expo-router → use expo-router's built-in theme system instead
