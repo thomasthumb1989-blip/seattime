@@ -164,6 +164,7 @@ export const Strings = {
     PRIVACY_POLICY: 'Privacy Policy',
     TERMS: 'Terms of Service',
     RATE: 'Rate SeatTime',
+    RATE_UNAVAILABLE: 'Reviews are available on the App Store and Google Play.',
     SUPPORT: 'Contact Support',
     SUPPORT_EMAIL: 'dan@listinglab.pro',
     DANGER: 'Danger Zone',

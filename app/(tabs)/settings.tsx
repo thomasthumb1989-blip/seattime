@@ -46,6 +46,7 @@ import { JoinFamilyModal } from '@src/components/settings/JoinFamilyModal';
 import { Colors } from '@src/constants/colors';
 import { Strings } from '@src/constants/strings';
 import { KEYS, setItem, removeItem } from '@src/utils/storage';
+import * as StoreReview from 'expo-store-review';
 import { exportSessionsAsJson } from '@src/utils/exportData';
 import { exportPDF } from '@src/utils/exportPDF';
 import { useDriveSessions } from '@src/hooks/useDriveSessions';
@@ -187,9 +188,18 @@ export default function SettingsScreen() {
     Linking.openURL(`mailto:${SS.SUPPORT_EMAIL}`);
   }, []);
 
-  const handleRate = useCallback(() => {
+  const handleRate = useCallback(async () => {
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert(SS.COMING_SOON, 'App Store listing will be available after launch.');
+    try {
+      const available = await StoreReview.isAvailableAsync();
+      if (available) {
+        await StoreReview.requestReview();
+      } else {
+        Alert.alert(SS.RATE, SS.RATE_UNAVAILABLE);
+      }
+    } catch {
+      Alert.alert(SS.RATE, SS.RATE_UNAVAILABLE);
+    }
   }, []);
 
   const handleSignOut = useCallback(async () => {
