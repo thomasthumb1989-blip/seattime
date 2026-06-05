@@ -77,9 +77,17 @@ export const Strings = {
   },
 
   HOME: {
-    GREETING: (name: string) => `${name}'s Progress`,
-    TOTAL_HOURS: 'Total Hours',
-    NIGHT_HOURS: 'Night Hours',
+    GREETING: (name: string) => `Welcome back`,
+    GREETING_FIRST: (name: string) => `Let's get started, ${name}!`,
+    PROGRESS_OF: (current: number, total: number) => `${current} of ${total} hours complete`,
+    DAY_HOURS: 'Day',
+    NIGHT_HOURS: 'Night',
+    HOURS_FRACTION: (current: number, total: number) => `${current}h / ${total}h`,
     RECENT_DRIVES: 'Recent Drives',
+    SEE_ALL: 'See All',
+    EMPTY_TITLE: 'No drives yet',
+    EMPTY_SUBTITLE: 'Start your first practice drive or log a past one to see your progress here.',
+    START_DRIVE: 'Start Drive',
+    LOG_PAST_DRIVE: 'Log Past Drive',
   },
 } as const;

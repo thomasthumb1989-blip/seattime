@@ -1,16 +1,20 @@
 import { useMemo } from 'react';
 import { getStateByAbbreviation } from '@src/data/stateRequirements';
-import { getTotalHours, getNightHours } from '@src/hooks/useDriveSessions';
+import { getTotalHours, getNightHours, getDayHours } from '@src/hooks/useDriveSessions';
 import type { DriveSession, StateRequirement } from '@src/types';
 
 export interface ProgressData {
   totalHours: number;
+  dayHours: number;
   nightHours: number;
   requiredTotal: number;
+  requiredDay: number;
   requiredNight: number;
   totalProgress: number;
+  dayProgress: number;
   nightProgress: number;
   hoursRemaining: number;
+  dayRemaining: number;
   nightRemaining: number;
   milestone: MilestoneHit | null;
   stateData: StateRequirement | null;
@@ -62,15 +66,19 @@ export function useProgress(
   return useMemo(() => {
     const stateData = getStateByAbbreviation(stateCode) ?? null;
     const requiredTotal = stateData?.totalHours ?? 0;
+    const requiredDay = stateData?.dayHours ?? 0;
     const requiredNight = stateData?.nightHours ?? 0;
 
     const totalHours = getTotalHours(sessions);
+    const dayHours = getDayHours(sessions);
     const nightHours = getNightHours(sessions);
 
     const totalProgress = requiredTotal > 0 ? Math.min(totalHours / requiredTotal, 1) : 0;
+    const dayProgress = requiredDay > 0 ? Math.min(dayHours / requiredDay, 1) : 0;
     const nightProgress = requiredNight > 0 ? Math.min(nightHours / requiredNight, 1) : 0;
 
     const hoursRemaining = Math.max(requiredTotal - totalHours, 0);
+    const dayRemaining = Math.max(requiredDay - dayHours, 0);
     const nightRemaining = Math.max(requiredNight - nightHours, 0);
 
     let milestone: MilestoneHit | null = null;
@@ -84,12 +92,16 @@ export function useProgress(
 
     return {
       totalHours,
+      dayHours,
       nightHours,
       requiredTotal,
+      requiredDay,
       requiredNight,
       totalProgress,
+      dayProgress,
       nightProgress,
       hoursRemaining,
+      dayRemaining,
       nightRemaining,
       milestone,
       stateData,
