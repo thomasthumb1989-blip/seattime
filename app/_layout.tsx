@@ -81,6 +81,10 @@ function RootLayoutNav() {
           name="drive"
           options={{ headerShown: false, gestureEnabled: false, animation: 'slide_from_bottom' }}
         />
+        <Stack.Screen
+          name="drive-complete"
+          options={{ headerShown: false, gestureEnabled: false, animation: 'fade' }}
+        />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>

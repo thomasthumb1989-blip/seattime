@@ -59,6 +59,23 @@ export const Strings = {
     NO_DRIVES_SUBTITLE: 'Start your first practice drive or log a past one.',
   },
 
+  DRIVE_COMPLETE: {
+    HERO: (name: string) => `Nice work, ${name}!`,
+    HERO_FALLBACK: 'Nice work!',
+    DRIVE_STATS: 'Drive Stats',
+    DURATION: 'Duration',
+    DISTANCE: 'Distance',
+    CONDITIONS: 'Conditions',
+    TIME: 'Time',
+    MILES: 'mi',
+    PROGRESS: 'Overall Progress',
+    HOURS_REMAINING: (hours: number) => `${hours.toFixed(1)} hours remaining`,
+    NIGHT_PROGRESS: 'Night Progress',
+    NIGHT_REMAINING: (hours: number) => `${hours.toFixed(1)} night hours remaining`,
+    COMPLETE: 'All hours complete!',
+    DONE: 'Done',
+  },
+
   HOME: {
     GREETING: (name: string) => `${name}'s Progress`,
     TOTAL_HOURS: 'Total Hours',

@@ -119,7 +119,7 @@ export default function DriveScreen() {
     };
 
     await addSession(session);
-    router.back();
+    router.replace({ pathname: '/drive-complete', params: { sessionId: session.id } } as any);
   }, [timer, teenName, stateCode, timeOfDay, weather, roadType, addSession]);
 
   const cancelEndDrive = useCallback(() => {
