@@ -33,3 +33,9 @@ export interface UserProfile {
   dateOfBirth: string;
   permitStartDate: string;
 }
+
+export interface OnboardingData {
+  state: string;
+  teenName: string;
+  completedOnboarding: boolean;
+}
