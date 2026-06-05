@@ -148,6 +148,8 @@ export const Strings = {
     COMING_SOON_MSG: 'This feature is coming in a future update.',
     DATA: 'Data & Export',
     EXPORT_PDF: 'Export PDF for DMV',
+    EXPORT_PDF_DESC: 'Professional driving log for your DMV appointment',
+    EXPORT_PDF_ERROR: 'Failed to generate PDF. Please try again.',
     EXPORT_JSON: 'Export Drive Data',
     EXPORT_JSON_DESC: 'Share all drive sessions as a JSON file',
     EXPORT_SUCCESS: 'Data exported successfully',

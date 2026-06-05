@@ -47,6 +47,7 @@ import { Colors } from '@src/constants/colors';
 import { Strings } from '@src/constants/strings';
 import { KEYS, setItem, removeItem } from '@src/utils/storage';
 import { exportSessionsAsJson } from '@src/utils/exportData';
+import { exportPDF } from '@src/utils/exportPDF';
 import { useDriveSessions } from '@src/hooks/useDriveSessions';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useSync } from '@src/hooks/useFirestoreSync';
@@ -77,6 +78,7 @@ export default function SettingsScreen() {
   const [showJoin, setShowJoin] = useState(false);
   const [appearance, setAppearance] = useState<AppearanceMode>('system');
   const [refreshing, setRefreshing] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -157,6 +159,25 @@ export default function SettingsScreen() {
       await exportSessionsAsJson(sessions);
     } catch {
       // User cancelled sharing
+    }
+  }, [sessions]);
+
+  const handleExportPdf = useCallback(async () => {
+    if (sessions.length === 0) {
+      Alert.alert(SS.EXPORT_PDF, SS.EXPORT_EMPTY);
+      return;
+    }
+    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setExportingPdf(true);
+    try {
+      const data = await getOnboardingData();
+      if (!data) return;
+      await exportPDF(sessions, data);
+      if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      Alert.alert(SS.EXPORT_PDF, SS.EXPORT_PDF_ERROR);
+    } finally {
+      setExportingPdf(false);
     }
   }, [sessions]);
 
@@ -408,14 +429,12 @@ export default function SettingsScreen() {
         <Animated.View entering={FadeIn.delay(240).duration(300)}>
           <Heading variant="h3" style={styles.sectionTitle}>{SS.DATA}</Heading>
           <View style={[styles.section, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            {/* TODO: Wire in feature #9 — PDF Export */}
             <SettingsRow
-              label={SS.EXPORT_PDF}
-              icon={<FileText size={18} color={colors.textSecondary} />}
-              onPress={() => {
-                if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert(SS.COMING_SOON, SS.COMING_SOON_MSG);
-              }}
+              label={exportingPdf ? 'Generating PDF…' : SS.EXPORT_PDF}
+              icon={exportingPdf
+                ? <Loader size={18} color={colors.primary} />
+                : <FileText size={18} color={colors.textSecondary} />}
+              onPress={exportingPdf ? undefined : handleExportPdf}
               colors={colors}
             />
             <SettingsRow
