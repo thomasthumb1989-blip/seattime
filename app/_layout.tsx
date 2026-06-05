@@ -10,13 +10,10 @@ import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { ThemeProvider } from '@/theme/theme-provider';
+import { AppErrorBoundary } from '@src/components/ErrorBoundary';
 import { AuthProvider, useAuth } from '@src/contexts/AuthContext';
 import { SyncProvider } from '@src/hooks/useFirestoreSync';
 import { hasCompletedOnboarding } from '@src/hooks/useOnboarding';
-
-export {
-  ErrorBoundary,
-} from 'expo-router';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -39,9 +36,11 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <AuthProvider>
-      <RootLayoutInner />
-    </AuthProvider>
+    <AppErrorBoundary>
+      <AuthProvider>
+        <RootLayoutInner />
+      </AuthProvider>
+    </AppErrorBoundary>
   );
 }
 

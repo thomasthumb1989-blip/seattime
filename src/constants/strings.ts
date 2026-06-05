@@ -249,4 +249,12 @@ export const Strings = {
     START_DRIVE: 'Start Drive',
     LOG_PAST_DRIVE: 'Log Past Drive',
   },
+
+  ERROR: {
+    TITLE: 'Something went wrong',
+    REASSURANCE: "Don't worry — your driving data is safe. Try restarting the screen or the app.",
+    TRY_AGAIN: 'Try Again',
+    RESTART: 'Restart App',
+    DEV_DETAILS: 'Error Details',
+  },
 } as const;
