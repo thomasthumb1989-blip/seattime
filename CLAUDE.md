@@ -64,9 +64,11 @@
 - Submit Android: eas submit --platform android
 
 ## Project Status
-- Phase 1 (Setup): COMPLETE — 13 commits on main
-- Phase 2 (Design System): COMPLETE — all UI components built, all screens designed and approved
-- Phase 3 (Features): NEXT — starting with Onboarding
+- Phase 1 (Setup): COMPLETE
+- Phase 2 (Design System): COMPLETE
+- Phase 3 (Features): IN PROGRESS — 8 of 10 features built
+- Features DONE: Onboarding, Drive Timer, Drive Complete, Home Dashboard, History, Progress, Settings, Multi-Parent Firebase Sync
+- Features REMAINING: PDF Export, Error Boundary
 - Feature build order: Onboarding → Drive Timer → Drive Complete → Home Dashboard → History → Progress → Settings → Multi-Parent Sync → PDF Export → Error Boundary
 
 ## File Naming
@@ -83,4 +85,7 @@
 - [2026-06-04] Ahrefs keywords explorer returns plan restriction error on Dan's subscription → don't attempt to use it
 - [2026-06-04] Firebase is JS SDK (web config), not @react-native-firebase → register as web app in Firebase Console, not iOS
 - [2026-06-04] App is paid upfront $9.99, no IAP, no RevenueCat, no paywall → Apple handles payment at download
-- [2026-06-05] ThemeProvider from @react-navigation/native blocked by SDK 56 expo-router → use expo-router's built-in theme system instead
+- [2026-06-05] ThemeProvider from @react-navigation/native blocked by SDK 56 expo-router → use expo-router's built-in theme system (re-exports ThemeProvider)
+- [2026-06-05] Firebase Auth needs initializeAuth with RN persistence for session survival across app restarts
+- [2026-06-05] Invite codes exclude I/O/0/1 to avoid confusion in 6-char codes
+- [2026-06-05] Auth is optional — "Skip for now" stores auth_skipped flag in AsyncStorage, user can sign up later in Settings
