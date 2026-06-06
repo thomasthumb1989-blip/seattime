@@ -101,6 +101,7 @@ function mergeSessions(local: DriveSession[], cloud: DriveSession[]): DriveSessi
 }
 
 async function findUserFamily(userId: string): Promise<string | null> {
+  if (!db) return null;
   try {
     const q = query(collection(db, 'families'), where('members', 'array-contains', userId));
     const snap = await getDocs(q);
@@ -117,6 +118,7 @@ async function createFamilyDoc(
   teenName: string,
   state: string,
 ): Promise<string> {
+  if (!db) throw new Error('Firebase not available');
   const familyRef = doc(collection(db, 'families'));
   await setDoc(familyRef, {
     members: [userId],
@@ -134,6 +136,7 @@ async function uploadSessionsToCloud(
   userId: string,
   sessions: DriveSession[],
 ): Promise<void> {
+  if (!db) return;
   const batch = writeBatch(db);
   for (const session of sessions) {
     const ref = doc(db, 'families', familyId, 'sessions', session.id);
@@ -147,6 +150,7 @@ async function uploadSessionsToCloud(
 }
 
 async function bidirectionalSync(familyId: string, userId: string): Promise<void> {
+  if (!db) return;
   const localSessions = (await getItem<DriveSession[]>(KEYS.sessions)) ?? [];
   const cloudRef = collection(db, 'families', familyId, 'sessions');
   const snapshot = await getDocs(cloudRef);
@@ -217,6 +221,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
         setFamilyId(fId);
         await setItem(KEYS.family_id, fId);
 
+        if (!db) { if (!cancelled) setSyncState('offline'); return; }
         const familyDoc = await getDoc(doc(db, 'families', fId));
         if (familyDoc.exists() && !cancelled) {
           const data = familyDoc.data();
@@ -247,7 +252,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
       unsubRef.current = null;
     }
 
-    if (!familyId || !user) return;
+    if (!familyId || !user || !db) return;
 
     const q = query(collection(db, 'families', familyId, 'sessions'));
     const unsubscribe = onSnapshot(
@@ -279,7 +284,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
   const pushSessionFn = useCallback(
     async (session: DriveSession) => {
-      if (!familyId || !user) return;
+      if (!familyId || !user || !db) return;
       try {
         const ref = doc(db, 'families', familyId, 'sessions', session.id);
         await setDoc(ref, {
@@ -295,7 +300,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   );
 
   const generateInviteFn = useCallback(async (): Promise<string> => {
-    if (!familyId || !user) throw new Error('Not signed in');
+    if (!familyId || !user || !db) throw new Error('Not signed in');
     const code = generateCode();
     await setDoc(doc(db, 'invites', code), {
       familyId,
@@ -308,7 +313,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
   const joinFamilyFn = useCallback(
     async (code: string): Promise<boolean> => {
-      if (!user) return false;
+      if (!user || !db) return false;
       try {
         const inviteSnap = await getDoc(doc(db, 'invites', code.toUpperCase()));
         if (!inviteSnap.exists()) return false;
@@ -359,7 +364,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
   const removeMemberFn = useCallback(
     async (uid: string) => {
-      if (!familyId) return;
+      if (!familyId || !db) return;
       try {
         await updateDoc(doc(db, 'families', familyId), {
           members: arrayRemove(uid),
@@ -373,7 +378,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   );
 
   const loadFamilyFn = useCallback(async () => {
-    if (!familyId) return;
+    if (!familyId || !db) return;
     try {
       const familyDoc = await getDoc(doc(db, 'families', familyId));
       if (familyDoc.exists()) {

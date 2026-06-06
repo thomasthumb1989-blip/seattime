@@ -1,15 +1,26 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Canvas, Path, Skia } from '@shopify/react-native-skia';
+import { StyleSheet, View, useColorScheme } from 'react-native';
 import {
   useSharedValue,
   withTiming,
   Easing,
   useDerivedValue,
 } from 'react-native-reanimated';
-import { useColorScheme } from 'react-native';
 import { Colors } from '@src/constants/colors';
 import { Heading } from './Heading';
+
+let SkiaCanvas: typeof import('@shopify/react-native-skia').Canvas | null = null;
+let SkiaPath: typeof import('@shopify/react-native-skia').Path | null = null;
+let SkiaApi: typeof import('@shopify/react-native-skia').Skia | null = null;
+
+try {
+  const skia = require('@shopify/react-native-skia');
+  SkiaCanvas = skia.Canvas;
+  SkiaPath = skia.Path;
+  SkiaApi = skia.Skia;
+} catch {
+  // Skia native module not available — fallback rendering used
+}
 
 interface ProgressRingProps {
   progress: number;
@@ -20,7 +31,7 @@ interface ProgressRingProps {
   isMilestone?: boolean;
 }
 
-export function ProgressRing({
+function ProgressRingFallback({
   progress,
   size = 160,
   strokeWidth = 12,
@@ -28,6 +39,46 @@ export function ProgressRing({
   color,
   isMilestone = false,
 }: ProgressRingProps) {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
+  const fillColor = isMilestone ? colors.accent : color ?? colors.primary;
+  const displayValue = label ?? `${Math.round(progress * 100)}%`;
+  const radius = (size - strokeWidth) / 2;
+
+  return (
+    <View style={[styles.container, { width: size, height: size }]}>
+      <View
+        style={[
+          styles.fallbackRing,
+          {
+            width: radius * 2,
+            height: radius * 2,
+            borderRadius: radius,
+            borderWidth: strokeWidth,
+            borderColor: fillColor + '30',
+          },
+        ]}
+      />
+      <View style={styles.labelContainer}>
+        <Heading variant="metric" color={fillColor} style={{ fontSize: size * 0.2 }}>
+          {displayValue}
+        </Heading>
+      </View>
+    </View>
+  );
+}
+
+export function ProgressRing(props: ProgressRingProps) {
+  const {
+    progress,
+    size = 160,
+    strokeWidth = 12,
+    label,
+    color,
+    isMilestone = false,
+  } = props;
+
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
@@ -41,10 +92,14 @@ export function ProgressRing({
     });
   }, [progress]);
 
+  if (!SkiaCanvas || !SkiaPath || !SkiaApi) {
+    return <ProgressRingFallback {...props} />;
+  }
+
   const center = size / 2;
   const radius = (size - strokeWidth) / 2;
 
-  const bgPath = Skia.Path.Make();
+  const bgPath = SkiaApi.Path.Make();
   bgPath.addCircle(center, center, radius);
 
   const fillColor = isMilestone
@@ -55,6 +110,7 @@ export function ProgressRing({
     ? 'rgba(255, 255, 255, 0.1)'
     : 'rgba(0, 0, 0, 0.06)';
 
+  const Skia = SkiaApi;
   const sweepAngle = useDerivedValue(() => {
     return animatedProgress.value * 360;
   });
@@ -73,6 +129,8 @@ export function ProgressRing({
   });
 
   const displayValue = label ?? `${Math.round(progress * 100)}%`;
+  const Canvas = SkiaCanvas;
+  const Path = SkiaPath;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -118,5 +176,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  fallbackRing: {
+    position: 'absolute',
   },
 });

@@ -1,11 +1,11 @@
-import { initializeApp, getApps } from 'firebase/app';
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import {
   type Auth,
   initializeAuth,
   getAuth,
   getReactNativePersistence,
 } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
@@ -17,23 +17,26 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '',
 };
 
-const requiredKeys = ['apiKey', 'projectId', 'appId'] as const;
-const missing = requiredKeys.filter((k) => !firebaseConfig[k]);
-if (missing.length > 0) {
-  console.warn(`Firebase config missing: ${missing.join(', ')}. Check your .env file.`);
-}
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
+let firebaseReady = false;
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-
-let auth: Auth;
 try {
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-  });
-} catch {
-  auth = getAuth(app);
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+
+  try {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } catch {
+    auth = getAuth(app);
+  }
+
+  db = getFirestore(app);
+  firebaseReady = true;
+} catch (e) {
+  console.error('Firebase init failed:', e);
 }
 
-const db = getFirestore(app);
-
-export { app, auth, db };
+export { app, auth, db, firebaseReady };

@@ -7,6 +7,7 @@ import { DMSans_400Regular } from '@expo-google-fonts/dm-sans';
 import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { Text, View, StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
 import { ThemeProvider } from '@/theme/theme-provider';
@@ -22,7 +23,9 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [fatalError, setFatalError] = useState<Error | null>(null);
+
+  const [loaded, fontError] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     Outfit_700Bold,
     Outfit_600SemiBold,
@@ -30,8 +33,21 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    if (fontError) {
+      console.error('Font loading failed:', fontError);
+      setFatalError(fontError);
+      SplashScreen.hideAsync();
+    }
+  }, [fontError]);
+
+  if (fatalError) {
+    return (
+      <View style={rootCrashStyles.container}>
+        <Text style={rootCrashStyles.title}>SeatTime failed to start</Text>
+        <Text style={rootCrashStyles.message}>{fatalError.message}</Text>
+      </View>
+    );
+  }
 
   if (!loaded) return null;
 
@@ -43,6 +59,12 @@ export default function RootLayout() {
     </AppErrorBoundary>
   );
 }
+
+const rootCrashStyles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: '#fff' },
+  title: { fontSize: 18, fontWeight: '700', marginBottom: 12, color: '#000' },
+  message: { fontSize: 14, color: '#666', textAlign: 'center' },
+});
 
 function RootLayoutInner() {
   const { user, loading: authLoading, isSkipped } = useAuth();

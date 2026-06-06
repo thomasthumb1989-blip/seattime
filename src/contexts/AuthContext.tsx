@@ -47,10 +47,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [skipChecked, setSkipChecked] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
+    let unsubscribe: (() => void) | undefined;
+
+    if (auth) {
+      unsubscribe = onAuthStateChanged(auth, (u) => {
+        setUser(u);
+        setLoading(false);
+      });
+    } else {
       setLoading(false);
-    });
+    }
 
     getItem<boolean>(KEYS.auth_skipped)
       .then((val) => {
@@ -58,22 +64,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .finally(() => setSkipChecked(true));
 
-    return unsubscribe;
+    return () => unsubscribe?.();
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase not available');
     await signInWithEmailAndPassword(auth, email, password);
     await removeItem(KEYS.auth_skipped);
     setIsSkipped(false);
   }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase not available');
     await createUserWithEmailAndPassword(auth, email, password);
     await removeItem(KEYS.auth_skipped);
     setIsSkipped(false);
   }, []);
 
   const signOutHandler = useCallback(async () => {
+    if (!auth) return;
     await firebaseSignOut(auth);
     await removeItem(KEYS.family_id);
   }, []);
@@ -98,6 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!appleCredential.identityToken) {
       throw new Error('No identity token from Apple');
     }
+
+    if (!auth) throw new Error('Firebase not available');
 
     const oauthCredential = new OAuthProvider('apple.com').credential({
       idToken: appleCredential.identityToken,
